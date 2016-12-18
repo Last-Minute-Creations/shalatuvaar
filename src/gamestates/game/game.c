@@ -6,6 +6,7 @@
 #include <ace/utils/palette.h>
 #include <ace/managers/viewport/simplebuffer.h>
 #include <ace/managers/key.h>
+#include <ace/managers/mouse.h>
 #include <ace/managers/game.h>
 #include <ace/managers/blit.h>
 #include "gamestates/game/bob.h"
@@ -149,6 +150,10 @@ void gsGameLoop(void) {
 			++g_uwBobX;
 			mapMoveBob(s_pKnightBob, g_uwBobX, g_uwBobY);
 		}
+	}
+	
+	if(mouseUse(MOUSE_LMB)) {
+		logWrite("Mouse pos: %u, %u\n", mouseGetX(), mouseGetY());
 	}
 
 	viewProcessManagers(s_pGameView);

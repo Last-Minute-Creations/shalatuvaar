@@ -1,9 +1,18 @@
 #include "input.h"
+#include <clib/exec_protos.h> // Amiga typedefs
+#include <clib/intuition_protos.h> // IDCMP_RAWKEY etc
+#include "config.h"
+#include <ace/config.h>
+#include <ace/managers/window.h>
+#include <ace/managers/key.h>
+#include <ace/managers/mouse.h>
+#include <ace/managers/joy.h>
 
 /* Globals */
 
 /* Functions */
 void inputOpen() {
+	mouseOpen();
 	joyOpen();
 }
 
@@ -20,6 +29,7 @@ void inputProcess() {
 			ReplyMsg((struct Message *) pMsg);
 
 			switch (pMsg->Class) {
+				// Keyboard
 				case IDCMP_RAWKEY:
 					if (pMsg->Code & IECODE_UP_PREFIX) {
 						pMsg->Code -= IECODE_UP_PREFIX;
@@ -27,6 +37,18 @@ void inputProcess() {
 					}
 					else if (!keyCheck(pMsg->Code)) {
 						keySetState(pMsg->Code, KEY_ACTIVE);
+					}
+					break;
+					
+				// Mouse
+				case IDCMP_MOUSEBUTTONS:
+					if (pMsg->Code & IECODE_UP_PREFIX) {
+						pMsg->Code -= IECODE_UP_PREFIX;
+						
+						mouseSetState(pMsg->Code, MOUSE_NACTIVE);
+					}
+					else if (!mouseCheck(pMsg->Code)) {
+						mouseSetState(pMsg->Code, MOUSE_ACTIVE);
 					}
 					break;
 			}
@@ -37,5 +59,6 @@ void inputProcess() {
 }
 
 void inputClose() {
+	mouseClose();
 	joyClose();
 }
