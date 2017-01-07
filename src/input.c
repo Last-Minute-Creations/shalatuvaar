@@ -26,7 +26,6 @@ void inputProcess() {
 
 	if (ulSignals & ulWindowSignal) {
 		while (pMsg = (struct IntuiMessage *) GetMsg(g_sWindowManager.pWindow->UserPort)) {
-			ReplyMsg((struct Message *) pMsg);
 
 			switch (pMsg->Class) {
 				// Keyboard
@@ -52,6 +51,7 @@ void inputProcess() {
 					}
 					break;
 			}
+			ReplyMsg((struct Message *) pMsg);
 		}
 	}
 
