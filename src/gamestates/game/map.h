@@ -10,6 +10,8 @@
 
 void mapCreate(void);
 void mapDrawHex(tBitMap *pHex, UWORD uwX, UWORD uwY);
+void mapDrawAxisHex(tBitMap *pHex, tAxisCoord *pAxis);
 void mapPlaceCharacterOnHex(tCharacter *pChar);
+void mapCheckAxisConstraints(tAxisCoord *pAxis);
 
 #endif // GUARD_MELLE_GAMESTATES_GAME_MAP_H

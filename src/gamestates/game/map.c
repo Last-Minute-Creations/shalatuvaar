@@ -44,6 +44,12 @@ void mapDrawHex(tBitMap *pHex, UWORD uwX, UWORD uwY) {
 	);
 }
 
+void mapDrawAxisHex(tBitMap *pHex, tAxisCoord *pAxis) {
+	tRectCoord sRect;
+	hexAxisToRect(pAxis, &sRect);
+	mapDrawHex(pHex, sRect.wC, sRect.wR);
+}
+
 void mapPlaceCharacterOnHex(tCharacter *pChar) {
 	UWORD uwDstX, uwDstY;
 	tRectCoord sRect;
@@ -58,4 +64,19 @@ void mapPlaceCharacterOnHex(tCharacter *pChar) {
 		pChar->pBob, g_pGameBuffer->pBuffer,
 		uwDstX, uwDstY
 	);
+}
+
+void mapCheckAxisConstraints(tAxisCoord *pAxis) {
+	tRectCoord sRect;
+	
+	hexAxisToRect(pAxis, &sRect);
+	if(sRect.wC < 0)
+		sRect.wC = 0;
+	if(sRect.wC >= HEX_COUNT_X)
+		sRect.wC = HEX_COUNT_X-1;
+	if(sRect.wR < 0)
+		sRect.wR = 0;
+	if(sRect.wR >= HEX_COUNT_Y)
+		sRect.wR = HEX_COUNT_Y-1;
+	hexRectToAxis(&sRect, pAxis);
 }
