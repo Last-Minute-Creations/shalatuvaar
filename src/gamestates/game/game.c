@@ -11,13 +11,14 @@
 #include <ace/managers/blit.h>
 #include "gamestates/game/bob.h"
 #include "gamestates/game/map.h"
+#include "gamestates/game/character.h"
 
 tView *s_pGameView;
 tVPort *s_pGameVPort;
 tCameraManager *s_pCamera;
 tSimpleBufferManager *g_pGameBuffer;
+tCharacter *s_pMainChar;
 
-tBob *s_pKnightBob;
 tBob *s_pCursor;
 
 UWORD s_uwMouseMapX, s_uwMouseMapY;
@@ -26,8 +27,6 @@ UWORD s_uwSelX, s_uwSelY, s_uwPrevSelX, s_uwPrevSelY;
 tBitMap *s_pHexSel;
 tBitmapMask *g_pHexMask;
 tBitMap *g_pHexGrn;
-
-UWORD g_uwBobX, g_uwBobY;
 
 void gsGameCreate(void) {
 	s_uwSelX = 0; s_uwPrevSelX = 0;
@@ -43,12 +42,10 @@ void gsGameCreate(void) {
 	g_pHexGrn = bitmapCreateFromFile("data/hex_grn.bm");
 
 	mapCreate();
-	
-	s_pKnightBob = bobUniqueCreate("data/knight.bm", "data/knight.msk", 32, 0);
 	s_pCursor = bobUniqueCreate("data/cursor.bm", "data/cursor.msk", 16, 0);
-	g_uwBobX = 3;
-	g_uwBobY = 2;
-	mapPlaceBobOnHex(s_pKnightBob, g_uwBobX, g_uwBobY);
+	
+	s_pMainChar = characterCreate();
+	mapPlaceCharacterOnHex(s_pMainChar);
 	viewLoad(s_pGameView);
 }
 
@@ -62,15 +59,16 @@ void gsGameLoop(void) {
 	
 	if(ubCursorOnNewTile) {
 		if(ubCursorOnNewTile == 1) {
-			// TODO: Undraw all objects on old & new tile
-			bobUndraw(s_pKnightBob, g_pGameBuffer->pBuffer);
+			// TODO: Undraw all objects on old & new tile - not needed later
+			bobUndraw(s_pMainChar->pBob, g_pGameBuffer->pBuffer);
 			// Undraw selection
 			mapDrawHex(g_pHexGrn, s_uwPrevSelX, s_uwPrevSelY);
 		}
 		// Draw selection on new tile
 		mapDrawHex(s_pHexSel, s_uwSelX, s_uwSelY);
-		// TODO: Draw all objects on old & new tile
-		mapPlaceBobOnHex(s_pKnightBob, g_uwBobX, g_uwBobY);
+		// TODO: Draw all objects on old & new tile.
+		// remove undraw if drawing only needed below.
+		mapPlaceCharacterOnHex(s_pMainChar);
 		ubCursorOnNewTile = 0;
 	}
 	s_uwPrevSelX = s_uwSelX;
@@ -95,8 +93,8 @@ void gsGameLoop(void) {
 	s_uwMouseMapY = mouseGetY() + s_pCamera->uPos.sUwCoord.uwY;
 	tAxisCoord sMouseAxisCoord;
 	tRectCoord sMouseRectCoord;
-	mapGetPixelAxisCoord(s_uwMouseMapX, s_uwMouseMapY, &sMouseAxisCoord);
-	mapAxisToRect(&sMouseAxisCoord, &sMouseRectCoord);
+	hexGetAxisFromPixel(s_uwMouseMapX, s_uwMouseMapY, &sMouseAxisCoord);
+	hexAxisToRect(&sMouseAxisCoord, &sMouseRectCoord);
 	if(
 		sMouseRectCoord.wC >= 0 && sMouseRectCoord.wC < HEX_COUNT_X &&
 		sMouseRectCoord.wR >= 0 && sMouseRectCoord.wR < HEX_COUNT_Y
@@ -129,11 +127,11 @@ void gsGameLoop(void) {
 void gsGameDestroy(void) {
 	viewLoad(0);
 	
+	characterDestroy(s_pMainChar);
 	bitmapMaskDestroy(g_pHexMask);
 	bitmapDestroy(s_pHexSel);
 	bitmapDestroy(g_pHexGrn);
 	
 	viewDestroy(s_pGameView);
-	bobUniqueDestroy(s_pKnightBob);
 	bobUniqueDestroy(s_pCursor);
 }
